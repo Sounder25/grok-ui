@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Offline Reader</string>
+    <string name="notification_channel_name">Reading aloud</string>
+    <string name="notification_channel_desc">Persistent playback controls while text is being read aloud offline</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_play">Play</string>
+    <string name="action_stop">Stop</string>
+    <string name="hint_paste_or_share">Paste text, a local HTML file, or a PDF URI, then press Read</string>
+    <string name="button_read">Read Aloud</string>
+    <string name="button_stop">Stop</string>
+    <string name="status_idle">Idle</string>
+    <string name="status_extracting">Extracting text…</string>
+    <string name="status_synthesizing">Synthesizing (%1$d / %2$d chunks)…</string>
+    <string name="status_playing">Playing</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_error">Error: %1$s</string>
+</resources>

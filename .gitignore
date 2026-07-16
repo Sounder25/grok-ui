@@ -6,3 +6,28 @@ backend/uploads/
 backend/data/
 .DS_Store
 Thumbs.db
+
+# --- Android / Gradle ---
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# --- Native / model artifacts fetched or built locally, never committed ---
+# (see docs/BUILD.md — these are produced by scripts/build_espeak_ng.sh and the Kokoro
+# ONNX export script, not checked into source control)
+third_party/espeak-ng/include/**
+third_party/espeak-ng/lib/**
+!third_party/espeak-ng/README.md
+app/src/main/assets/espeak-ng-data/**
+!app/src/main/assets/espeak-ng-data/.gitkeep
+app/src/main/assets/models/*.onnx
+app/src/main/assets/models/*.bin
+!app/src/main/assets/models/README.md
