@@ -1,8 +1,6 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-plugins {
-    id("com.android.application") version "8.5.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.24" apply false
-}
+// Top-level build file. Per-plugin versions for :app (AGP, Kotlin Android) live in
+// settings.gradle.kts's pluginManagement block instead of a `plugins {}` block here --
+// see the comment there for why that matters for building :core standalone.
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)

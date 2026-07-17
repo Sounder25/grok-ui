@@ -5,6 +5,27 @@ Studio, but two binary artifacts are deliberately **not** checked in — they're
 per-ABI native/model binaries that must be produced on a machine with internet access and
 the Android NDK. Neither step can run inside a network-isolated CI/agent sandbox.
 
+## Testing the pure logic without the Android SDK
+
+`SentenceChunker`, `TextSanitizer`, and `WavPcmEncoder` (the parts with no Android
+framework dependency) live in the `:core` module — a plain Kotlin/JVM Gradle module, not
+an Android one. That means their unit tests (`core/src/test/kotlin/...`) build and run
+with nothing but a JDK and Maven Central access:
+
+```sh
+./gradlew :core:test
+```
+
+This does *not* need the Android SDK, the NDK, or `dl.google.com` — it's how this logic
+was actually verified (compiled and run, 17/17 passing) inside a sandbox that had none of
+those. `:app` (the Android module — everything under `ingestion/`, `engine/`, `service/`,
+`ui/`, plus the JNI phonemizer) does need the full toolchain below.
+
+If your environment can reach Maven Central but *not* the Gradle Plugin Portal's
+artifact CDN (`plugins-artifacts.gradle.org`) — as was the case in the sandbox this was
+built in — `gradle :core:test --configure-on-demand` skips configuring `:app` entirely,
+so it doesn't matter that `:app`'s Android Gradle Plugin can't resolve there.
+
 ## Prerequisites
 
 - Android Studio Koala+ (or a standalone Android SDK with `compileSdk = 34`)

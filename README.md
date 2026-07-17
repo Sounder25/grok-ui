@@ -13,10 +13,15 @@ pipeline, OS/audio integration) fit together, file by file.
 ## Status
 
 All Kotlin/Java application code, the JNI phonemizer shim, the Gradle/CMake build
-config, and the ONNX export tooling are implemented and committed. Two things are
-intentionally **not** in this repo, because they're large per-ABI binaries that must be
-produced on a machine with internet access and the Android NDK — not something that can
-be generated inside a sandboxed build environment:
+config, and the ONNX export tooling are implemented and committed. The pure-logic slice
+(`:core` — sentence chunking, text sanitization, WAV encoding) has real unit tests that
+build and run cleanly (`./gradlew :core:test`, 17/17 passing) with nothing but a JDK —
+that's actually been executed, not just written. The rest of the app (`:app` — the
+Android module: JNI phonemizer, ONNX engine, foreground service, ExoPlayer wiring, UI)
+has been reviewed carefully but **could not be compiled or run on-device**, because two
+things are intentionally **not** in this repo — they're large per-ABI binaries that must
+be produced on a machine with internet access and the Android NDK, neither of which was
+available where this was built:
 
 1. A compiled `libespeak-ng.so` per ABI (`scripts/build_espeak_ng.sh`)
 2. The quantized Kokoro-82M `.onnx` file + voice style tables
@@ -30,13 +35,19 @@ done, and the app will crash on first "Read Aloud" until step 2 is done.
 ## Project layout
 
 ```
+core/                          # plain Kotlin/JVM module, no Android dependency, real unit tests
+├── src/main/kotlin/com/offlinetts/reader/
+│   ├── ingestion/TextSanitizer.kt
+│   ├── pipeline/{SentenceChunker,PipelineTypes}.kt
+│   └── playback/WavPcmEncoder.kt
+└── src/test/kotlin/...         # 17 tests, runnable with `./gradlew :core:test` — no SDK needed
 app/src/main/
 ├── cpp/                      # espeak-ng JNI shim + CMake build
 ├── java/com/offlinetts/reader/
-│   ├── ingestion/             # HTML/PDF extraction, text sanitizing, phonemizer JNI wrapper
+│   ├── ingestion/             # HTML/PDF extraction, phonemizer JNI wrapper (+ TextSanitizer from :core)
 │   ├── engine/                # ONNX Runtime session, tokenizer, voice styles, Kokoro engine
-│   ├── pipeline/               # sentence chunker, synthesis worker, bounded playback buffer
-│   ├── playback/               # ExoPlayer wiring, audio focus, WAV encoding
+│   ├── pipeline/               # synthesis worker, bounded playback buffer (+ chunker from :core)
+│   ├── playback/               # ExoPlayer wiring, audio focus (+ WAV encoder from :core)
 │   ├── service/                 # foreground service tying it all together
 │   └── ui/                      # minimal activity: paste text / share HTML / share PDF
 ├── assets/models/              # NOT checked in — see docs/BUILD.md

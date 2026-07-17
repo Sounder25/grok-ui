@@ -34,8 +34,9 @@ see `docs/BUILD.md` for how to produce it with `scripts/export_kokoro_onnx.py`.
 
 Producer/consumer, exactly as specified:
 
-- **Worker A** (`SentenceChunker.kt`) — splits sanitized text into sentence-ish chunks
-  (~300 chars, abbreviation-aware), run up front since it's cheap pure-CPU string work.
+- **Worker A** (`SentenceChunker.kt`, in `:core` — see below) — splits sanitized text
+  into sentence-ish chunks (~300 chars, abbreviation-aware), run up front since it's cheap
+  pure-CPU string work.
 - **Worker B** (`SynthesisWorker.kt`) — pulls `TextChunk`s off a `Channel`, phonemizes +
   synthesizes each one on a single dedicated dispatcher (espeak-ng and the ONNX session
   both have state that's only safe to touch serially), and pushes `AudioChunk`s into...
@@ -86,6 +87,16 @@ layer — see below.
         ▼
  speakers, via AudioFocusManager-gated ExoPlayer
 ```
+
+## `:core` — the pure-Kotlin/JVM slice
+
+`SentenceChunker`, `TextSanitizer`, and `WavPcmEncoder` have no Android framework
+dependency, so they live in a separate Gradle module (`core/`, plugin
+`org.jetbrains.kotlin.jvm`, not an Android module) rather than `:app`. `:app` depends on
+`:core`; the package names are unchanged, so nothing importing them had to change. This
+split means the algorithmic core of the app — chunking, sanitization, and PCM encoding —
+has real, executable unit tests (`core/src/test/kotlin/...`, 17 tests) that build and run
+with just a JDK, no Android SDK/NDK required: `./gradlew :core:test`.
 
 ## Known simplifications (MVP scope)
 
